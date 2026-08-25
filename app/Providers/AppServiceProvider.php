@@ -36,8 +36,13 @@ class AppServiceProvider extends ServiceProvider
         // forceScheme('https') no es opcional: sin el las URLs salen en http
         // dentro de una pagina https y el navegador bloquea el envio del
         // formulario por contenido mixto.
-        if ($codespace = env('CODESPACE_NAME')) {
-            $dominio = env('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN', 'app.github.dev');
+        //
+        // Se lee con getenv() y no con env(): env() pasa por el repositorio de
+        // Dotenv, que se arma una sola vez al arrancar y que devuelve null si
+        // alguien corrio 'php artisan config:cache'. getenv() lee el entorno
+        // del proceso directo y no falla en ninguno de esos casos.
+        if ($codespace = getenv('CODESPACE_NAME')) {
+            $dominio = getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN') ?: 'app.github.dev';
 
             URL::forceRootUrl("https://{$codespace}-8000.{$dominio}");
             URL::forceScheme('https');
