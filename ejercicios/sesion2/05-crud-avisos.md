@@ -6,6 +6,8 @@ El formulario del Ejercicio 1 es decorativo y la portada solo lee. Aquí el blog
 
 > Requisitos: Ejercicio 1 (formulario estilizado) y niveles 1-2 del Ejercicio 2 (portada con BD y scope `publicados`). Es parte obligatoria de la tarea.
 
+> **Si trabajas en GitHub Codespaces**, el pull de esta sesión te trae ya resuelto `app/Providers/AppServiceProvider.php` y no tienes que hacer nada. Sin ese arreglo, en cuanto envías el formulario Laravel te manda a `http://localhost:8000`, una dirección que no existe fuera del contenedor: tu navegador está en el dominio `-8000.app.github.dev`, pero la petición llega al contenedor como si viniera de localhost, y es con ese host con el que se arman `route()`, `asset()` y los `redirect()`. Abre el archivo si quieres ver las dos líneas que lo corrigen.
+
 ## Parte 0 · Nace el controlador y la portada se muda (10 min)
 
 1. Genera el controlador **con todo el esqueleto del CRUD ya puesto**:
