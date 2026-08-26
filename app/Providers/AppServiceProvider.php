@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,31 +21,53 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // --- Las URLs cuando trabajas en GitHub Codespaces -------------------
-        //
-        // Tu navegador entra por el dominio publico del puerto 8000, pero la
-        // peticion llega al contenedor como si viniera de localhost. Laravel
-        // arma route(), url(), asset() y los redirect() con el host de la
-        // peticion, asi que sin estas dos lineas el action de tu formulario
-        // sale como http://localhost:8000/avisos y el navegador se va a una
-        // direccion que no existe fuera del contenedor.
-        //
-        // Se configura solo, con las mismas variables que Codespaces ya define
-        // y que tambien usa el vite.config.js del curso. En el contenedor local
-        // no hace nada, porque ahi CODESPACE_NAME no existe.
-        //
-        // forceScheme('https') no es opcional: sin el las URLs salen en http
-        // dentro de una pagina https y el navegador bloquea el envio del
-        // formulario por contenido mixto.
-        //
-        // Se lee con getenv() y no con env(): env() pasa por el repositorio de
-        // Dotenv, que se arma una sola vez al arrancar y que devuelve null si
-        // alguien corrio 'php artisan config:cache'. getenv() lee el entorno
-        // del proceso directo y no falla en ninguno de esos casos.
+        $this->urlsPublicasEnCodespaces();
+    }
+
+    /**
+     * Hace que las URLs absolutas apunten al dominio publico del codespace.
+     *
+     * Tu navegador entra por https://<codespace>-8000.app.github.dev, que por
+     * fuera responde en el puerto 443. Dentro del contenedor el servidor escucha
+     * en el 8000, y Laravel arma route(), url(), asset() y los redirect() con el
+     * host, el esquema Y EL PUERTO de la peticion. Sin esto, el redirect de tu
+     * store() sale como http://localhost:8000/ y el navegador no conecta.
+     *
+     * En el contenedor local no hace nada: ahi CODESPACE_NAME no existe.
+     */
+    private function urlsPublicasEnCodespaces(): void
+    {
+        // 'php artisan serve' NO atiende las peticiones en este proceso: levanta
+        // el servidor en un proceso HIJO y solo le pasa una lista blanca de
+        // variables de entorno. CODESPACE_NAME no esta en esa lista, asi que
+        // dentro de las peticiones getenv() la ve vacia aunque en la terminal si
+        // exista. Este boot() corre tambien en el proceso padre, antes de que
+        // arranque el hijo, que es el momento justo para agregarla a la lista.
+        if (class_exists(ServeCommand::class)) {
+            foreach (['CODESPACE_NAME', 'GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN'] as $variable) {
+                if (! in_array($variable, ServeCommand::$passthroughVariables)) {
+                    ServeCommand::$passthroughVariables[] = $variable;
+                }
+            }
+        }
+
+        $raiz = null;
+
         if ($codespace = getenv('CODESPACE_NAME')) {
             $dominio = getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN') ?: 'app.github.dev';
+            $raiz = "https://{$codespace}-8000.{$dominio}";
+        } elseif (str_contains($appUrl = (string) config('app.url'), '.app.github.dev')) {
+            // Respaldo: si la variable no llego pero el .env ya trae la direccion
+            // publica, se usa esa. El .env si se lee dentro del proceso hijo,
+            // porque sale de un archivo y no del entorno del proceso.
+            $raiz = rtrim($appUrl, '/');
+        }
 
-            URL::forceRootUrl("https://{$codespace}-8000.{$dominio}");
+        if ($raiz) {
+            URL::forceRootUrl($raiz);
+
+            // Sin esto las URLs salen en http dentro de una pagina https y el
+            // navegador bloquea el envio del formulario por contenido mixto.
             URL::forceScheme('https');
         }
     }
