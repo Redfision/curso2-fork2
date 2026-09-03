@@ -8,7 +8,7 @@
 - **Nivel 2 (obligatorio):** el `SelectFilter` por categoría y la acción **Publicar** con confirmación, visible solo en los avisos que son borrador.
 - **Nivel 3 (opcional, cuenta como extra):** un widget en el dashboard con el total de avisos y cuántos son borradores; o, si tu blog tiene etiquetas, un `CheckboxList` por relación en el formulario.
 
-La guía está en tu proyecto: `ejercicios/sesion4/01-filament-resource.md`.
+La guía está en tu proyecto: `ejercicios/sesion4/01-filament-resource.md`. Y todo lo conceptual de la clase (reactividad, Livewire, Filament por dentro) está por escrito en `ejercicios/sesion4/00-livewire-y-filament-por-dentro.md`, por si quieres releerlo antes de hacer el ejercicio.
 
 ## 2. Quién entra al panel (~15 min)
 
