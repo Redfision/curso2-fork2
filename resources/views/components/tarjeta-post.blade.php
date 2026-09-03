@@ -3,10 +3,23 @@
 <article class="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
     <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full mb-2">
         {{ $post->categoria->nombre }}
-
     </span>
     <h2 class="text-xl font-semibold text-gray-900">{{ $post->titulo }}</h2>
     <p class="text-gray-600 mt-2">{{ Str::limit($post->contenido, 90) }}</p>
-    {{ $post->created_at->format('d/m/Y') }}
+    <p class="text-gray-400 text-xs mt-4">{{ $post->created_at->format('d/m/Y') }}</p>
 
+    <div class="mt-4 flex gap-4 items-center">
+        @can('update', $post)
+            <a href="{{ route('avisos.edit', $post) }}" class="text-blue-700 text-sm font-semibold hover:underline">Editar</a>
+        @endcan
+
+        @can('delete', $post)
+            <form method="POST" action="{{ route('avisos.destroy', $post) }}" class="inline"
+                  onsubmit="return confirm('¿Borrar este aviso?')">
+                @csrf
+                @method('DELETE')
+                <button class="text-red-600 text-sm font-semibold hover:underline">Borrar</button>
+            </form>
+        @endcan
+    </div>
 </article>

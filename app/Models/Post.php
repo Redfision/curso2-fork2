@@ -4,12 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/Post.php
 class Post extends Model
 {
-    protected $fillable = ['titulo', 'contenido', 'categoria_id'];
+    protected $fillable = ['titulo', 'contenido', 'categoria_id', 'publicado', 'user_id'];
 
-    protected $casts = ['publicado' => 'boolean'];
+    protected $casts = [
+        'publicado' => 'boolean',
+    ];
+
+    // ---- Relaciones ----
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function etiquetas()
+    {
+        return $this->belongsToMany(Etiqueta::class);
+    }
+
+    // ---- Scopes ----
 
     public function scopePublicados($query)
     {
@@ -21,9 +41,8 @@ class Post extends Model
         return $query->where('categoria_id', $categoriaId);
     }
 
-    public function categoria()
+    public function scopeRecientes($query, $dias = 7)
     {
-        return $this->belongsTo(Categoria::class);
+        return $query->where('created_at', '>=', now()->subDays($dias));
     }
 }
-
