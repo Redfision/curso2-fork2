@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Console\ServeCommand;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -69,6 +70,16 @@ class AppServiceProvider extends ServiceProvider
             // Sin esto las URLs salen en http dentro de una pagina https y el
             // navegador bloquea el envio del formulario por contenido mixto.
             URL::forceScheme('https');
+
+            // Lo anterior arregla lo que Laravel CONSTRUYE (route, url, asset),
+            // no lo que Laravel LEE de la peticion. El tunel de Codespaces le
+            // entrega al servidor la peticion con "Host: localhost:8000" y pone
+            // la direccion publica en X-Forwarded-Host / -Proto / -Port. Sin
+            // confiar en ese proxy, $request->fullUrl() dice localhost, y ese
+            // valor es el que el login guarda como "adonde ibas"
+            // (redirect()->intended, en tu blog y en el panel): entrabas por
+            // /admin, te mandaba al login y al entrar te dejaba en localhost.
+            TrustProxies::at(['127.0.0.1', '::1']);
         }
     }
 }
