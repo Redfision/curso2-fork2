@@ -6,7 +6,7 @@ El formulario del Ejercicio 1 es decorativo y la portada solo lee. Aquí el blog
 
 > Requisitos: Ejercicio 1 (formulario estilizado) y niveles 1-2 del Ejercicio 2 (portada con BD y scope `publicados`). Es parte obligatoria de la tarea.
 
-> **Si trabajas en GitHub Codespaces**, el pull de esta sesión te trae ya resuelto `app/Providers/AppServiceProvider.php` y no tienes que hacer nada. Sin ese arreglo, guardas un aviso y el navegador se queda en una página de error: tu navegador entra por `https://<tu-codespace>-8000.app.github.dev`, que por fuera responde en el puerto 443, pero dentro del contenedor `php artisan serve` escucha en el 8000, y Laravel arma las URLs absolutas con el host **y el puerto** de la petición. El `redirect()` de tu `store()` termina apuntando a `...app.github.dev:8000`, un puerto que ahí fuera no existe. Abre el archivo si quieres ver las dos líneas que lo corrigen.
+> **Si trabajas en GitHub Codespaces**, el pull de esta sesión te trae ya resuelto `app/Providers/AppServiceProvider.php` y no tienes que hacer nada. Sin ese arreglo, guardas un aviso y el navegador se queda en una página de error: tú entras por `https://<tu-codespace>-8000.app.github.dev`, pero la petición cruza el túnel de Codespaces y a Laravel le llega con otro host y otro puerto. Como `route()`, `asset()` y los `redirect()` se arman con lo que trae la petición, el `redirect()` de tu `store()` termina apuntando a `http://localhost:8000/`, que en tu navegador no existe. Ábrelo si quieres ver cómo se corrige: tiene un detalle que sorprende, porque `php artisan serve` atiende las peticiones en un **proceso aparte** al que no le pasa todas las variables de entorno.
 
 ## Parte 0 · Nace el controlador y la portada se muda (10 min)
 
