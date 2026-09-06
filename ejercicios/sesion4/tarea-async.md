@@ -27,8 +27,10 @@ En tu blog público, quita el `@can` de la tarjeta de aviso y entra como editor.
 Todo lo que viste de Livewire en clase lo hace Filament por ti. Aquí lo escribes tú, en tu **blog público**: el buscador de avisos de la sesión.
 
 ```bash
-php artisan make:livewire BuscadorAvisos
+php artisan make:livewire BuscadorAvisos --class
 ```
+
+> El `--class` importa: sin él, Livewire 4 crea un componente de **un solo archivo** (`resources/views/components/⚡buscador-avisos.blade.php`, clase y vista juntas). Con `--class` crea las dos piezas separadas, que es la forma de esta lectura y la que usa Filament por dentro.
 
 `app/Livewire/BuscadorAvisos.php`:
 

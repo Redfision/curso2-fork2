@@ -63,8 +63,10 @@ Nadie escribió "pon la etiqueta límite": la vista dice que existe cuando el co
 ## 3. Un componente Livewire: una clase con estado y una vista
 
 ```bash
-php artisan make:livewire BuscadorAvisos
+php artisan make:livewire BuscadorAvisos --class
 ```
+
+> El `--class` importa: sin él, Livewire 4 crea un componente de **un solo archivo** (`resources/views/components/⚡buscador-avisos.blade.php`, clase y vista juntas). Con `--class` crea las dos piezas separadas, que es la forma de esta lectura y la que usa Filament por dentro.
 
 Crea dos archivos.
 
@@ -245,7 +247,48 @@ Filament pinta menús, modales y desplegables con Alpine, y todo lo que toca dat
 
 La regla: **cada interacción es un viaje al servidor**. En local son decenas de milisegundos; en producción, cientos. Si la experiencia depende de que algo pase en menos de eso, Livewire no es la herramienta. En los sistemas reales la administración completa vive en Livewire a través de Filament, y lo público sigue siendo Blade con Tailwind, como tu blog. Las dos cosas conviven en el mismo proyecto.
 
-## 9. Filament: el stack TALL, empaquetado para paneles
+## 9. Filament: qué problema resuelve
+
+Todo sistema tiene dos caras. La **pública** es la que diseñas: tu portada, tu tarjeta de aviso, tu Tailwind; entra cualquier visitante. La de **administración** es donde se dan de alta, se corrigen y se borran los registros de cada tabla, con búsqueda, filtros, permisos y reportes. Esa segunda cara es casi igual en todos los sistemas: una lista con búsqueda, un formulario con validación, Editar y Borrar, un login y roles. Lo único que cambia es el modelo.
+
+La cuenta que importa: tu CRUD de avisos de las sesiones 2 y 3 son alrededor de 200 líneas para un solo modelo (controlador, dos vistas, validación, rutas, Policy, botones). Un sistema real tiene más de 100 modelos con esa misma cara. Son 20 000 líneas de lo mismo, escritas y mantenidas a mano; cada cambio de diseño se repite 100 veces.
+
+Filament es un conjunto de paquetes para Laravel, **escritos con Livewire**, que traen hecha esa cara: formularios (Schemas), tablas, acciones, notificaciones, widgets, y el **Panel Builder**, que las junta en una aplicación completa con login y menú. Es gratuito y de código abierto; nació en 2021 (Dan Harrin) y hoy va en la versión 5. No reemplaza nada de lo que ya sabes: usa tus modelos, tus relaciones, tus scopes y tu Policy tal cual. Reemplaza el trabajo repetido.
+
+## 10. ¿Por qué un panel?
+
+Un **panel** es una aplicación aparte, montada en una URL de tu proyecto (`/admin`), con su propio login, su menú, su dashboard y su lista de Resources. Comparado con tu blog público:
+
+| Tu blog público (`/`) | El panel (`/admin`) |
+|---|---|
+| tus vistas Blade, tu Tailwind, tu diseño | cero vistas tuyas: la interfaz es de Filament, igual en todos los sistemas |
+| tus rutas, escritas en `web.php` | rutas que no escribes (`php artisan route:list --path=admin`) |
+| cualquier visitante; sesión solo para escribir | solo usuarios con sesión, y adentro solo lo que tu Policy permita |
+| Livewire solo donde tú lo pongas (el buscador) | todo es Livewire: cada pantalla es un componente |
+
+Tres razones para tenerlo aparte:
+
+1. **Separación.** Lo público se diseña; la administración no se diseña, **se declara**. Por eso conviven en el mismo proyecto sin estorbarse: tu portada sigue siendo tuya y el panel se ve como cualquier panel de Filament.
+2. **Una sola puerta.** El `authMiddleware` del panel y `canAccessPanel()` deciden quién entra. Adentro, tus Policies deciden qué toca cada quien. Dos capas, dos preguntas distintas.
+3. **Escala.** Decenas de Resources se ordenan por grupos en el menú, y un mismo proyecto puede tener **varios paneles**, cada uno con su URL, su login y su menú: uno para administración, otro para operación, uno por tipo de usuario. Todos comparten los mismos modelos, las mismas migraciones y las mismas Policies: cambia la puerta, no la casa. En producción es normal ver más de diez paneles en un solo proyecto.
+
+## 11. Livewire y Filament: la misma máquina, con las piezas ya escritas
+
+Todo lo que escribiste en el buscador de la sección 3 tiene su equivalente dentro del panel:
+
+| Lo que escribiste en el buscador | Lo mismo, dentro del panel |
+|---|---|
+| `public string $busqueda`: estado que viaja en el snapshot | `$data['titulo']` del formulario, la búsqueda, el orden y los filtros de la tabla: estado en el mismo snapshot |
+| `wire:model.live.debounce.300ms` | `TextInput::make()->live(debounce: 500)` y la caja de búsqueda de la tabla |
+| `public function limpiar()`: una acción | `Action::make('publicar')->action(...)`, `EditAction`, el botón Guardar (`create()` de la Page) |
+| `render()` con tu consulta y tu vista | `table()` arma la consulta y `form()` el formulario; la vista la pone Filament |
+| `wire:loading` | el spinner del botón y la tabla atenuada mientras carga |
+| `$this->dispatch('aviso-guardado')` | `Notification::make()->send()`: viaja en la misma respuesta |
+| `mount()` | `EditRecord::mount($record)` carga el registro en `$data` |
+
+Tres cosas que se siguen de la tabla. Cada pantalla del panel **es** un componente Livewire: `ListPosts extends ListRecords`, y hasta arriba de esa cadena está `Livewire\Component`, la misma clase de tu buscador. Cada clic dentro del panel es el mismo `POST /livewire/update` con el mismo snapshot de la sección 4, solo que con más estado adentro. Y por eso Filament no es "otra cosa": es Livewire con las piezas ya escritas, y aplican las mismas reglas: cada interacción viaja al servidor, lo caro no va en `render()`, el estado vive en PHP.
+
+## 12. Filament: el stack TALL, empaquetado para paneles
 
 Filament (2021, Dan Harrin; hoy en su versión 5) es una colección de paquetes sobre Laravel, Livewire, Alpine y Tailwind: **Panel Builder**, **Schemas** (formularios), **Tables**, **Actions**, **Notifications**, **Widgets**. Tablas, formularios, acciones y paneles ya escritos como componentes Livewire. Tú escribes la capa de arriba: una clase que **declara** qué modelo, qué campos y qué columnas. Todo lo demás lo trae hecho.
 
@@ -262,7 +305,7 @@ Y debajo del Resource, dos archivos que declaran: `Schemas/PostForm.php` (qué c
 
 `ListPosts extends ListRecords`, y `ListRecords` es un componente Livewire: el buscador de la sección 3 y tu tabla de avisos son **la misma cosa**, con más líneas.
 
-## 10. El panel es una clase
+## 13. El panel es una clase
 
 ```php
 public function panel(Panel $panel): Panel
@@ -300,7 +343,7 @@ public function panel(Panel $panel): Panel
 - **`/admin` no necesita `npm run dev`.** Filament sirve sus propios assets ya compilados; Vite solo entra si haces un tema propio (`->viteTheme()`).
 - En producción, el `authMiddleware` suele sumar un segundo filtro por rol, y el panel trae logo, tema y notificaciones. La estructura es idéntica.
 
-## 11. El viaje de una petición al panel
+## 14. El viaje de una petición al panel
 
 **Abrir `/admin/posts`:** el middleware del panel (cookies, sesión, CSRF, `Authenticate`) → `ListPosts`, un componente Livewire, se monta con estado vacío → le pide a `PostResource::table()` la definición (columnas, filtros, acciones: solo declaraciones) → con eso arma **una consulta** Eloquent (el `with()` de las relaciones, el `orderBy`, la paginación) → vuelve el HTML de la tabla con el snapshot dentro. A partir de ahí, cada búsqueda o filtro es el viaje corto de Livewire.
 
@@ -308,7 +351,7 @@ public function panel(Panel $panel): Panel
 
 Todo lo que viste en las sesiones 2 y 3 sigue ahí, en el mismo orden. Filament solo puso las piezas.
 
-## 12. Declaras el qué; Filament escribe el cómo
+## 15. Declaras el qué; Filament escribe el cómo
 
 Tu portada de la sesión 2 decía **cómo**:
 
@@ -336,7 +379,7 @@ select * from categorias where id in (1, 2, 3);
 
 Es la misma consulta, con otro autor. La segunda consulta es el `with('categoria')` que aprendiste para evitar el N+1: Filament lo agrega solo cuando ve el punto en `categoria.nombre`.
 
-## 13. Lo que hiciste a mano, en una clase
+## 16. Lo que hiciste a mano, en una clase
 
 | Sesiones 2 y 3, a mano | Hoy, con Filament |
 |---|---|
@@ -348,7 +391,7 @@ Es la misma consulta, con otro autor. La segunda consulta es el `with('categoria
 
 Nada de la columna izquierda desaparece del framework: sigue existiendo, pero **lo escribe Filament** a partir de lo que declaras a la derecha. Por eso el orden del curso: quien nunca escribió un `store()` no puede saber qué está pasando cuando el panel guarda. Tú sí.
 
-## 14. Filament también es reactivo
+## 17. Filament también es reactivo
 
 `->live()` es el `wire:model.live` de Filament: cada cambio de ese campo viaja al servidor y el formulario entero se vuelve a pintar.
 
