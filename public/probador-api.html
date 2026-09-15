@@ -27,8 +27,14 @@
         .campo label { font-size: 0.72em; font-weight: 700; color: var(--c-gray); text-transform: uppercase; letter-spacing: 0.04em; }
         .campo input { font-family: 'JetBrains Mono', monospace; font-size: 0.84em; padding: 7px 10px; border: 1px solid var(--c-border); border-radius: 9px; outline: none; background: #fff; color: var(--c-ink); }
         .campo input:focus { border-color: var(--c-light); box-shadow: 0 0 0 3px #dbeafe; }
-        .campo.ancho input { width: 430px; }
-        .campo.medio input { width: 250px; }
+        .campo.ancho input { width: 380px; }
+        .campo.medio input { width: 210px; }
+        .campo.chico-in input { width: 140px; }
+
+        .barra-nota { background: #eef4fe; border-bottom: 1px solid #d5e3fb; padding: 7px 24px; font-size: 0.82em; color: #334155; }
+        .barra-nota code { background: #dbeafe; padding: 1px 6px; border-radius: 5px; font-size: 0.92em; color: #1d4ed8; }
+        .barra-nota.mal { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+        .barra-nota.ok { background: #f0fdf6; border-color: #bbe9d0; color: #047857; }
 
         .estado-token { font-size: 0.8em; padding: 6px 12px; border-radius: 99px; font-weight: 700; white-space: nowrap; }
         .estado-token.sin { background: #fef2f2; color: var(--c-accent); border: 1px solid #fecaca; }
@@ -118,6 +124,16 @@
         <label for="base">Dirección de tu API</label>
         <input id="base" spellcheck="false">
     </div>
+    <div class="campo chico-in">
+        <label for="loginEmail">Correo</label>
+        <input id="loginEmail" value="editor@blog.test" spellcheck="false">
+    </div>
+    <div class="campo chico-in">
+        <label for="loginPass">Contraseña</label>
+        <input id="loginPass" type="password" value="secreto123" spellcheck="false">
+    </div>
+    <button class="enviar" id="btnEntrar" style="padding:8px 16px; font-size:0.85em;">Pedir token</button>
+
     <div class="campo medio">
         <label for="token">Token (Bearer)</label>
         <input id="token" placeholder="todavía no tienes" spellcheck="false">
@@ -125,6 +141,8 @@
     <div id="estadoToken" class="estado-token sin">sin token</div>
     <button class="chico" id="btnOlvidar">Olvidar token</button>
 </div>
+
+<div class="barra-nota" id="barraNota">Entra con <code>editor@blog.test</code> o con <code>admin@blog.test</code>, los dos con <code>secreto123</code>. El botón manda un <code>POST /api/token</code>, el mismo que está en la lista de abajo.</div>
 
 <div class="layout">
     <div class="panel-izq">
@@ -351,9 +369,16 @@
             $('status').textContent = r.status + ' ' + r.statusText;
             $('tiempo').textContent = ms + ' ms · ' + (r.headers.get('content-type') || 'sin tipo');
 
-            var bonito = texto;
-            try { bonito = JSON.stringify(JSON.parse(texto), null, 2); } catch (e) {}
-            $('respuesta').innerHTML = texto ? colorear(bonito) : '(respuesta vacía)';
+            var bonito = texto, recortada = false;
+            try {
+                var obj = JSON.parse(texto);
+                // Con APP_DEBUG=true, Laravel adjunta la traza completa del error.
+                // Estorba para leer el mensaje, asi que se guarda y no se pinta.
+                if (obj && obj.trace) { delete obj.trace; delete obj.file; delete obj.line; recortada = true; }
+                bonito = JSON.stringify(obj, null, 2);
+            } catch (e) {}
+            $('respuesta').innerHTML = (texto ? colorear(bonito) : '(respuesta vacía)') +
+                (recortada ? '\n<span style="color:#7c8db5;">(se recortó la traza del error: en producción no viaja)</span>' : '');
             pistaDeRespuesta(r.status, texto);
             alHistorial(r.status, actual.metodo, ruta);
 
@@ -393,7 +418,58 @@
         $('token').value = '';
         try { localStorage.removeItem('probador-token'); } catch (e) {}
         estadoToken(); actualizarCurl();
+        var nota = $('barraNota');
+        nota.className = 'barra-nota';
+        nota.innerHTML = 'Token olvidado <strong>en esta página</strong>. Ojo: sigue siendo válido en el servidor. Para darlo de baja de verdad, manda <code>POST /api/token/revocar</code>.';
     };
+    // Entrar y traer el token sin tener que editar el JSON de la peticion.
+    // Es el mismo POST /api/token que esta en la lista, con otro envoltorio.
+    $('btnEntrar').onclick = async function () {
+        var base = $('base').value.replace(/\/$/, '');
+        var nota = $('barraNota');
+        $('btnEntrar').disabled = true;
+        nota.className = 'barra-nota';
+        nota.textContent = 'Pidiendo token...';
+        try {
+            var r = await fetch(base + '/api/token', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: $('loginEmail').value.trim(),
+                    password: $('loginPass').value,
+                    dispositivo: 'probador'
+                })
+            });
+            var j = await r.json();
+            if (r.ok && j.token) {
+                $('token').value = j.token;
+                try { localStorage.setItem('probador-token', j.token); } catch (e) {}
+                estadoToken(); actualizarCurl();
+                nota.className = 'barra-nota ok';
+                nota.innerHTML = 'Token entregado a <strong>' + (j.usuario || '') + '</strong>' +
+                    (j.rol ? ' (rol ' + j.rol + ')' : '') + '. Ya puedes usar las peticiones con candado.';
+            } else if (r.status === 422) {
+                nota.className = 'barra-nota mal';
+                nota.innerHTML = '<strong>422.</strong> ' + ((j.errors && j.errors.email && j.errors.email[0]) || j.message || 'Credenciales incorrectas') +
+                    ' Es la misma validación de siempre, respondida en JSON.';
+            } else if (r.status === 429) {
+                nota.className = 'barra-nota mal';
+                nota.innerHTML = '<strong>429.</strong> Demasiados intentos. Es el <code>throttle</code> de tu ruta haciendo su trabajo: espera un minuto.';
+            } else if (r.status === 404) {
+                nota.className = 'barra-nota mal';
+                nota.innerHTML = '<strong>404.</strong> Todavía no existe <code>POST /api/token</code>. Es el paso 2 de la guía 02.';
+            } else {
+                nota.className = 'barra-nota mal';
+                nota.textContent = 'Respondió ' + r.status + '. Revisa la respuesta completa mandando la petición desde la lista.';
+            }
+        } catch (e) {
+            nota.className = 'barra-nota mal';
+            nota.textContent = 'No se pudo conectar. Revisa que "composer run dev" siga corriendo y que la dirección sea la de tu proyecto.';
+        } finally {
+            $('btnEntrar').disabled = false;
+        }
+    };
+
     $('btnCopiar').onclick = function () {
         navigator.clipboard.writeText($('curl').textContent).then(function () {
             $('btnCopiar').textContent = 'Copiado';
