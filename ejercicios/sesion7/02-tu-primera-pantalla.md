@@ -30,7 +30,7 @@ Espera a que diga `Compiled successfully` y abre el puerto **4200**: en Codespac
 
 Debes ver un encabezado azul que dice **Avisos** y un recuadro punteado: tu aplicación ya arranca.
 
-Al arrancar, Angular imprime dos avisos en amarillo: que tu versión de Node no está soportada, y que es un servidor solo para desarrollo. Los dos son esperados.
+Al arrancar, Angular imprime un aviso en amarillo: que es un servidor solo para desarrollo. Es esperado.
 
 ---
 

@@ -98,7 +98,7 @@ cd frontend
 npm start
 ```
 
-Espera a que diga `Compiled successfully`. Antes vas a ver avisos en amarillo; el de que tu versión de Node no está soportada es esperado: compila y sirve igual.
+Espera a que diga `Compiled successfully`. Antes sale un aviso en amarillo, `Warning: This is a simple server for use in testing or debugging`: es esperado. Sale porque el servidor escucha en `0.0.0.0`, que es lo que deja a Codespaces abrir el puerto.
 
 ## Paso 7 · Ábrelo en el navegador
 
@@ -119,7 +119,8 @@ Listo: llegas a la clase con las dos aplicaciones corriendo.
 |---|---|
 | `fatal: 'upstream' does not appear to be a git repository` | Tu proyecto no conoce el repo del curso. Conéctalo una vez con `git remote add upstream https://github.com/ramsessal/curso2.git` y repite el paso 3 |
 | `fatal: Need to specify how to reconcile divergent branches.` | Usaste `git pull`. Usa los dos comandos del paso 3: `git fetch upstream` y `git merge --no-edit upstream/main` |
-| `CONFLICT` al hacer el merge | Regresa con `git merge --abort` y avisa en el canal del curso. La base solo trae archivos nuevos, así que no debería pasar |
+| `CONFLICT (add/add): Merge conflict in app/Jobs/EnviarAvisoPorCorreo.php` | Es el trabajo que escribiste en la sesión 5 contra el que trae el curso desde la sesión 6. Quédate con el tuyo: `git checkout --ours app/Jobs/EnviarAvisoPorCorreo.php`, después `git add app/Jobs/EnviarAvisoPorCorreo.php` y `git commit --no-edit`. Sigue con el paso 4 |
+| `CONFLICT` en cualquier otro archivo | Regresa con `git merge --abort` y avisa en el canal del curso |
 | `No encuentro frontend/package.json.` al correr el paso 5 | El paso 3 no se hizo en esta rama. Repítelo aquí |
 | `AVISO: en esta carpeta no hay proyecto de Laravel` | Tu proyecto de Laravel no está en esta carpeta. Avisa en el canal del curso |
 | El 4200 no aparece en PUERTOS | `npm start` no está corriendo o todavía no dice `Compiled successfully`. Revisa la terminal 2 |

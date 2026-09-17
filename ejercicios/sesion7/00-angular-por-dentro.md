@@ -79,13 +79,13 @@ En el curso se usa la **16**, la misma versión de un sistema real en producció
 
 Si copias un ejemplo con `@if` y tu aplicación no compila, es de una versión más nueva. La idea es la misma; la sintaxis no.
 
-Al arrancar vas a ver este aviso:
+Si corres `npx ng version` dentro de `frontend/`, vas a ver este aviso:
 
 ```
-Warning: The current version of Node (22.x) is not supported by Angular.
+Warning: The current version of Node (22.23.2) is not supported by Angular.
 ```
 
-Tu contenedor trae Node 22 y Angular 16 se publicó antes que él. **Compila y sirve igual**; se verificó. El aviso es esperado.
+Tu contenedor trae Node 22 y Angular 16 se publicó antes que él. **Compila y sirve igual**; se verificó en un Codespace. Al arrancar con `npm start` no aparece: el único aviso en amarillo es el de que es un servidor solo para desarrollo.
 
 ---
 
@@ -566,7 +566,7 @@ this.buscar.valueChanges.pipe(
 )
 ```
 
-Se verificó con tu API: al escribir "curso" de corrido sale **una sola** petición, `?q=curso`, no cinco. Y con una API lenta, al llegar un texto nuevo la búsqueda anterior se canceló: el navegador la marcó como abortada y a la pantalla solo llegó la respuesta del texto más reciente. Una promesa no se puede cancelar así, y esa es una de las razones por las que Angular usa Observables. El extra C de la tarea construye el buscador completo, y la actividad **Canicas de RxJS** de Moodle dibuja cada uno de estos operadores en el tiempo.
+Se verificó con tu API: al escribir "curso" de corrido sale **una sola** petición, `?q=curso`, no cinco. Y con una API lenta, al llegar un texto nuevo la búsqueda anterior se canceló: el navegador la marcó como abortada y a la pantalla solo llegó la respuesta del texto más reciente. Una promesa no se puede cancelar así, y esa es una de las razones por las que Angular usa Observables. El extra C de la tarea construye el buscador completo.
 
 **Los Subjects.** Un `Subject` es un `Observable` al que tú le mandas valores con `next()`. El que usas hoy es un **`BehaviorSubject`**, que además **recuerda el último valor**: quien se suscribe tarde recibe el valor actual al instante. Por eso sirve para la sesión: cualquier componente que aparezca después sabe si hay alguien dentro.
 
@@ -869,7 +869,7 @@ Lo que sigue es gratuito y sirve para lo que usas en este curso. Casi todo está
 | Angular, depurar | [Angular DevTools](https://angular.dev/tools/devtools) | la extensión de la sección 27 |
 | RxJS, un operador a la vez | [Learn RxJS](https://www.learnrxjs.io/learn-rxjs/operators) | cada operador con ejemplos, y los más usados marcados |
 | RxJS, cuál operador buscas | [El árbol de decisión de operadores](https://rxjs.dev/operator-decision-tree) | respondes unas preguntas y te dice qué operador necesitas |
-| RxJS, verlo en el tiempo | [RxMarbles](https://rxmarbles.com/) | los diagramas de canicas de la actividad, interactivos: mueves los valores y ves qué sale |
+| RxJS, verlo en el tiempo | [RxMarbles](https://rxmarbles.com/) | diagramas de canicas interactivos: mueves los valores y ves qué sale |
 
 Si prefieres video en español, DevTalles, Platzi y EDteam tienen cursos de pago de Angular y de TypeScript. Antes de pagar, revisa con qué versión de Angular se grabaron, o que expliquen los módulos (`NgModule`): tu proyecto los usa.
 

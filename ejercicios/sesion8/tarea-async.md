@@ -1,27 +1,36 @@
-# Tarea de la semana · Sesión 7
+# Tarea de la semana · Sesión 8
 
 Tiempo estimado: 2.5 horas, sin contar los extras. Se entrega en el Pull Request de siempre.
 
-Para repasar, en Moodle hay una actividad de unos 10 minutos: **Compila o truena**, doce casos de TypeScript en los que decides si el código compila, corre o truena. Tu mejor intento se registra solo.
+En clase viste en vivo los bloques 3 y 4: entrar con token y que tu API te reconozca, y después crear, borrar y encontrarte con el 403 de tu Policy. **Esta tarea los consolida en tu propio proyecto**, y agrega lo que un equipo con frontend aparte hace todos los días: la pantalla pide algo, la API lo agrega, se prueba, y la pantalla lo usa.
 
-**Si alguna pieza se te fue en clase**, empieza por [`05-primeros-pasos.md`](05-primeros-pasos.md): nueve pasos cortos en un componente de práctica, sin token, antes de la parte 1. **Si terminas todo y quieres más**, [`06-retos-avanzados.md`](06-retos-avanzados.md) trae cuatro retos: una pantalla por aviso con el router, editar con PUT, la paginación de Laravel y un interceptor que mide.
+Para repasar, en Moodle hay una actividad de unos 10 minutos: **¿Qué responde tu API?**, doce rondas en las que eliges qué código responde tu API en cada situación. Tu mejor intento se registra solo.
+
+**Si alguna pieza se te fue en clase**, empieza por [`05-primeros-pasos.md`](../sesion7/05-primeros-pasos.md): nueve pasos cortos en un componente de práctica, sin token. **Si terminas todo y quieres más**, [`06-retos-avanzados.md`](../sesion7/06-retos-avanzados.md) trae cuatro retos: una pantalla por aviso con el router, editar con PUT, la paginación de Laravel y un interceptor que mide.
+
+La explicación escrita de todo lo de clase está en la lectura [`00-angular-por-dentro.md`](../sesion7/00-angular-por-dentro.md).
 
 ---
 
-## 1. Termina los ejercicios de Angular (40 min)
+## 1. Termina las guías de clase (40 min)
 
-Lo que no alcanzaste en clase, con las guías [`02-tu-primera-pantalla.md`](02-tu-primera-pantalla.md), [`03-entrar-con-token.md`](03-entrar-con-token.md) y [`04-escribir-y-el-403.md`](04-escribir-y-el-403.md):
+Lo que hicimos en vivo, ahora en tu proyecto y sin prisa, con las guías [`03-entrar-con-token.md`](../sesion7/03-entrar-con-token.md) y [`04-escribir-y-el-403.md`](../sesion7/04-escribir-y-el-403.md):
 
-- [ ] la lista de avisos en el 4200, leída de tu API
-- [ ] entrar con token, y **¿Quién soy?** respondiendo 200 gracias al interceptor
+- [ ] el servicio de sesión con `BehaviorSubject`, y el formulario para entrar
+- [ ] **¿Quién soy?** respondiendo **401** antes de registrar el interceptor
+- [ ] el interceptor en `providers`, y **¿Quién soy?** respondiendo **200** con tu nombre y tu rol
 - [ ] crear un aviso, con los errores del 422 debajo de cada campo
-- [ ] borrar uno tuyo (204) y ver el 403 en uno ajeno
+- [ ] borrar uno tuyo (**204**) y ver el **403** en uno sembrado por otro
+
+Si la lista de avisos todavía no te carga de tu API, esa parte está en [`02-tu-primera-pantalla.md`](../sesion7/02-tu-primera-pantalla.md) y va primero.
+
+**Anota las dos respuestas de ¿Quién soy?**: las vas a escribir en la descripción del PR.
 
 ---
 
 ## 2. Termina el ejercicio de TypeScript (35 min)
 
-En clase hiciste los pasos 1 a 3 de [`01-typescript.md`](01-typescript.md): el JavaScript que no avisa, el mismo archivo como TypeScript, y la interfaz `Aviso` que encuentra los tres errores antes de correr. Siguen los pasos 4 a 7, en el mismo `practica-ts/avisos.ts`:
+En clase hiciste los pasos 1 a 3 de [`01-typescript.md`](../sesion7/01-typescript.md): el JavaScript que no avisa, el mismo archivo como TypeScript, y la interfaz `Aviso` que encuentra los tres errores antes de correr. Siguen los pasos 4 a 7, en el mismo `practica-ts/avisos.ts`:
 
 - [ ] **Paso 4**: el tipo `Rol` con los tres roles de tu Policy, y `puedeCrear(sesion: Sesion | null)`. Rómpelo con las tres variantes de la guía y anota qué dice el compilador.
 - [ ] **Paso 5**: el genérico `Respuesta<T>`, el sobre `data` de Laravel para uno o para muchos.
@@ -68,11 +77,13 @@ test('el listado de categorias responde 200 con id y nombre', function () {
 
 Comprueba: `php artisan test` en verde con la prueba nueva, y `/api/categorias` en el navegador te da la lista.
 
+Este punto es el trabajo de todos los días cuando el frontend va aparte: **la pantalla necesitó algo, la API lo agregó, y la prueba lo deja fijo.**
+
 ---
 
 ## 4. El formulario de aviso nuevo, como en un sistema real (35 min)
 
-En clase hiciste el formulario **por plantilla**, con `[(ngModel)]`. Un sistema real en producción usa casi siempre **formularios reactivos**: el formulario entero vive en la clase, con sus reglas. Aquí conviertes el tuyo, y de paso cambias el número de categoría por un `<select>` que lee tu ruta nueva.
+En clase lo hiciste **por plantilla**, con `[(ngModel)]`. Un sistema real en producción usa casi siempre **formularios reactivos**: el formulario entero vive en la clase, con sus reglas. Aquí conviertes el tuyo, y de paso cambias el número de categoría por un `<select>` que lee tu ruta nueva.
 
 **La interfaz y el servicio de categorías**, dentro de `frontend/`:
 
@@ -251,7 +262,7 @@ export class AvisoNuevoComponent implements OnInit {
 2. Llénalo, elige una categoría y créalo: **201**, el aviso aparece en la lista y el formulario queda limpio.
 3. Quita `Validators.maxLength(120)` y crea un aviso con un título de más de 120 caracteres: ahora sí sale la petición, y tu API responde **422** con `The titulo field must not be greater than 120 characters.` debajo del título. Regresa la regla.
 
-El punto 3 es el que importa: **las reglas de la pantalla son comodidad, las de tu API son las que protegen.** Si alguien llama a tu API sin tu pantalla, solo quedan las segundas.
+El punto 3 es el que importa: **las reglas de la pantalla son comodidad, las de tu API son las que protegen.** Si alguien llama a tu API sin tu pantalla, solo quedan las segundas. Es lo mismo que viste en clase con el 403: la pantalla no es la que decide.
 
 ---
 
@@ -323,6 +334,8 @@ Regístralo en `app.module.ts`, **después** del de autenticación:
 ```ts
     { provide: HTTP_INTERCEPTORS, useClass: ErroresInterceptor, multi: true }
 ```
+
+Ese orden es el del laboratorio de la cadena que viste en clase: de ida, en el orden de los `providers`; de regreso, al revés. Por eso el de errores ve la respuesta primero.
 
 Comprueba: entra, y en la terminal de la raíz revoca todos los tokens:
 
@@ -406,7 +419,7 @@ Para que la pantalla sepa qué avisos son tuyos necesita dos datos que tu API to
 
 4. Y úsalo en la condición del botón (o en `[puedeBorrar]`, si hiciste el extra A).
 
-Es la misma regla de tu `PostPolicy`, escrita otra vez del lado de la pantalla. Escribe en el PR, en una línea, **por qué esconder el botón no protege nada**.
+Es la misma regla de tu `PostPolicy`, escrita otra vez del lado de la pantalla. Escribe en el PR, en una línea, **por qué esconder el botón no protege nada**. El 403 que viste en clase es la respuesta.
 
 ### C. Un buscador que no satura tu API
 
@@ -495,7 +508,7 @@ ngOnInit(): void {
       this.error = '';
     }),
     switchMap(texto => this.avisosService.listar(texto).pipe(
-      // Dentro del switchMap: si una búsqueda falla, el buscador sigue vivo.
+      // Dentro del switchMap: si una busqueda falla, el buscador sigue vivo.
       catchError(() => {
         this.error = 'No pude buscar en tu API.';
         return of([]);
@@ -536,7 +549,7 @@ En el PR, si hiciste este extra: cuántas peticiones salieron al escribir una pa
 
 ### D. La parte C del ejercicio de TypeScript
 
-Unos 45 minutos. Los pasos 8 a 10 de [`01-typescript.md`](01-typescript.md), en `practica-ts/frontera.ts`: revisar lo que llega de tu API con `unknown` y un guardián de tipo, el estado de una petición como unión discriminada (con la forma exacta del 422 de Laravel) y los tipos de lo que mandas, derivados de `Aviso` con `Pick` y `Partial`.
+Unos 45 minutos. Los pasos 8 a 10 de [`01-typescript.md`](../sesion7/01-typescript.md), en `practica-ts/frontera.ts`: revisar lo que llega de tu API con `unknown` y un guardián de tipo, el estado de una petición como unión discriminada (con la forma exacta del 422 de Laravel) y los tipos de lo que mandas, derivados de `Aviso` con `Pick` y `Partial`.
 
 ---
 
@@ -544,28 +557,30 @@ Unos 45 minutos. Los pasos 8 a 10 de [`01-typescript.md`](01-typescript.md), en 
 
 ```bash
 git add -A
-git commit -m "sesion 7: frontend en Angular"
+git commit -m "sesion 8: entrar, escribir y el 403"
 git push origin HEAD
 ```
 
 Revisa que `frontend/node_modules` y `frontend/practica-ts/salida` **no** aparezcan en los cambios: sus `.gitignore` los dejan fuera.
 
-Y en Moodle, la URL de tu Pull Request en **Entrega Sesión 7**.
+Y en Moodle, la URL de tu Pull Request en **Entrega Sesión 8**. Es el mismo PR de siempre: cada push se agrega solo.
 
 En la descripción del PR van cuatro cosas:
 
 1. Qué respondió **¿Quién soy?** antes de registrar el interceptor y qué respondió después.
-2. De los tres errores del paso 1 de TypeScript, **cuál no te habría avisado JavaScript nunca**, y qué te dijo TypeScript sobre él.
-3. Qué pasó en el punto 3 de la parte 4: el título largo con la regla y sin ella.
+2. Qué respondió tu API al borrar un aviso sembrado, y **quién tomó esa decisión**.
+3. Qué pasó en el punto 3 de la parte 4: el título largo con la regla de la pantalla y sin ella.
 4. Cuántas pruebas te reporta `php artisan test` con la de categorías.
 
 ---
 
 ## Checklist de la entrega
 
+- [ ] `frontend/src/app/servicios/sesion.service.ts` y el componente `entrar`
+- [ ] el interceptor de autenticación registrado en `providers`
+- [ ] el componente `aviso-nuevo`, con su `@Output` y el `borrar()` de la lista
 - [ ] `frontend/practica-ts/avisos.ts` y `decorador.ts`, compilando sin errores
-- [ ] `frontend/src/app/` con tus componentes, servicios, interceptores y modelos
-- [ ] `HttpClientModule`, `FormsModule`, `ReactiveFormsModule` y los interceptores en `app.module.ts`
+- [ ] `HttpClientModule`, `FormsModule`, `ReactiveFormsModule` y los dos interceptores en `app.module.ts`
 - [ ] `GET /api/categorias` en `routes/api.php` y su prueba en `tests/Feature/Api/`
 - [ ] el formulario de aviso nuevo, reactivo y con el `<select>` de categorías
 - [ ] `salir()` que revoca en el servidor, y el interceptor de errores
@@ -578,6 +593,12 @@ En la descripción del PR van cuatro cosas:
 
 | Lo que ves | Qué pasó |
 |---|---|
+| `NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'` | Falta `FormsModule` en los `imports` del módulo |
+| Después de entrar, **¿Quién soy?** sigue en **401** | El interceptor no está en `providers`, o el encabezado no dice `Bearer` |
+| `Too Many Attempts.` al entrar | Es el límite de la ruta de token: espera un minuto y vuelve a intentar |
+| Al entrar sale `Esas credenciales no coinciden con nuestros registros.` | La contraseña es `secreto123`, o falta sembrar: `php artisan db:seed --class=UserSeeder` |
+| `TS2341: Property 'sesion' is private and only accessible within class` | En la plantilla solo se ven las propiedades públicas. Cambia `private sesion` por `public sesion` en el constructor |
+| La lista no se actualiza después del 201 | Falta `(creado)="lista.cargar()"` en `app.component.html`, o el `#lista` |
 | `TypeError: fetch failed` en el paso 6 de TypeScript | Tu Laravel no está corriendo: `composer run dev` en la terminal 1 |
 | `GET /api/categorias` responde 404 | La ruta no está en `routes/api.php`. Compruébalo con `php artisan route:list --path=api` |
 | `GET /api/categorias` responde 500, y en el log `Class "Categoria" not found` | Falta el `use App\Models\Categoria;` arriba de `routes/api.php` |

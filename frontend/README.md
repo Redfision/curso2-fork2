@@ -33,6 +33,6 @@ Es el equivalente de `php artisan make:...`.
 
 ## Versiones
 
-Angular 16.2, la misma versión de un sistema real en producción. Cuando arranca, Angular avisa que tu versión de Node no está soportada: es esperado, compila y sirve igual.
+Angular 16.2, la misma versión de un sistema real en producción. `ng version` marca el Node 22 del contenedor como `Unsupported`, porque Angular 16 se publicó antes que él: es esperado, compila y sirve igual.
 
 `npm start` corre `ng serve`, el servidor de desarrollo de la CLI de Angular. En la 16 trabaja con **webpack**, no con Vite como tu Laravel: empaqueta toda la aplicación antes de servirla y, al guardar, recarga la página completa. Desde Angular 17, los proyectos nuevos usan esbuild y Vite. Cuál usa un proyecto lo dice la línea `"builder"` de `angular.json`.
