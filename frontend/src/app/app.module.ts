@@ -2,13 +2,19 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
+import { AvisosListaComponent } from './avisos-lista/avisos-lista.component';
+
+import { HttpClientModule } from '@angular/common/http';
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    AvisosListaComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+     HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
