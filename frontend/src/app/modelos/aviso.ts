@@ -7,3 +7,9 @@ export interface Aviso {
   autor?: string;
   creado: string;
 }
+
+export interface NuevoAviso {
+  titulo: string;
+  contenido: string;
+  categoria_id: number | null;
+}

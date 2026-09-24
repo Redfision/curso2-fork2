@@ -4,5 +4,9 @@
 </header>
 
 <main class="contenido">
-  <app-avisos-lista></app-avisos-lista>
+  <app-entrar></app-entrar>
+  
+  <app-aviso-nuevo (creado)="lista.cargar()"></app-aviso-nuevo>
+  <app-avisos-lista #lista></app-avisos-lista>
+  
 </main>

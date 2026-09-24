@@ -1,0 +1,24 @@
+<form *ngIf="sesion.sesion$ | async" class="panel" (ngSubmit)="guardar()">
+  <h2>Nuevo aviso</h2>
+
+  <div class="campo">
+    <label for="titulo">Título</label>
+    <input id="titulo" name="titulo" [(ngModel)]="aviso.titulo">
+    <span *ngIf="errores['titulo']" class="error">{{ errores['titulo'][0] }}</span>
+  </div>
+
+  <div class="campo">
+    <label for="contenido">Contenido</label>
+    <textarea id="contenido" name="contenido" [(ngModel)]="aviso.contenido"></textarea>
+    <span *ngIf="errores['contenido']" class="error">{{ errores['contenido'][0] }}</span>
+  </div>
+
+  <div class="campo">
+    <label for="categoria">Categoría (su número)</label>
+    <input id="categoria" name="categoria_id" type="number" [(ngModel)]="aviso.categoria_id">
+    <span *ngIf="errores['categoria_id']" class="error">{{ errores['categoria_id'][0] }}</span>
+  </div>
+
+  <button type="submit" [disabled]="enviando">Crear aviso</button>
+  <p *ngIf="mensaje" class="nota" style="margin: 12px 0 0;">{{ mensaje }}</p>
+</form>
